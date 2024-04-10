@@ -1,112 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Devanagari OCR</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Ubuntu&display=swap" rel="stylesheet">
-    <link href='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.1/css/all.css' rel='stylesheet'>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
-
-
+    <title>Handwritten Recognition</title>
 </head>
+<body>
+    <h1>Handwritten Recognition</h1>
+    <h2>MNIST Digit Recognition</h2>
+    <input id='mnist-image-selector' type="file" />
+    <button id='mnist-predict-button'>Predict MNIST Digit</button>
+    <p id="mnist-prediction-result"></p>
 
-<body data-theme="dark" class="scrolls text-center my-4" id="HTML" onload="changing()">
-    <nav class="shadow bg-body rounded">
-        <div class="heading">
+    <h2>Devanagari Character Recognition</h2>
+    <input id='devanagari-image-selector' type="file" />
+    <button id='devanagari-predict-button'>Predict Devanagari Character</button>
+    <p id="devanagari-prediction-result"></p>
 
-            <h1>Handwritten Devanagari Text Recognition using Machine Learning</h1>
-        </div>
-
-
-
-        
-    </nav>
-
-    <div class="panel0">
-        <div class=" name">
-            <div class="heading">
-
-            </div>
-
-
-        </div>
-    </div>
-
-
-
-
-
-
-
-    <div class="col">
-        <label for="inputPassword4" class="form-label">Upload the image of Handwritten Digit</label>
-        <input id='image-selector' type="file" class="form-control" name="emotion">
-    </div>
-    <div class="col-12 p-3">
-        <div>
-            <button id='predict-button' type="submit" class="btn btn-primary">Let's Go !!</button>
-        </div>
-        <p class= 'p-4'>PREDICTION: <span id="result" class="ftext">...</span></p>
-        <p class='p-2'>PROBABILITY: <span id="probability" class='ftext'>...</span></p>
-        <img id="selected-image" width="400" src=" " />
-    </div>
-
-
-
-
-
-    </div>
-
-
-
-
-    
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        let base64Image;
-        $("#image-selector").change(function() {
-            let reader = new FileReader();
-            reader.onload = function(e) {
-                let dataURL = reader.result;
-                $('#selected-image').attr("src", dataURL);
-                base64Image = dataURL.replace(/^data:image\/(png|jpg|jpeg);base64,/, " ");
-                console.log(base64Image);
-            }
-            reader.readAsDataURL($("#image-selector")[0].files[0]);
-            $("#result").text(" ");
-            $("#probability").text(" ");
+        $(document).ready(function() {
+            $('#mnist-predict-button').click(function() {
+                var fileInput = $('#mnist-image-selector')[0].files[0];
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var base64Image = e.target.result.split(',')[1];
+                    $.ajax({
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({image: base64Image}),
+                        url: '/predict_mnist',
+                        success: function(response) {
+                            $('#mnist-prediction-result').text('Predicted Digit: ' + response.prediction.result + ', Accuracy: ' + response.prediction.accuracy.toFixed(2));
+                        }
+                    });
+                };
+                reader.readAsDataURL(fileInput);
+            });
 
-        });
-
-        $("#predict-button").click(function() {
-            let message = {
-                image: base64Image
-            }
-            console.log(message);
-            $.post("http://127.0.0.1:5000/predict", JSON.stringify(message), function(response) {
-                $("#result").text(response.prediction.result);
-                $("#probability").text(response.prediction.accuracy.toFixed(2));
-                console.log(response);
+            $('#devanagari-predict-button').click(function() {
+                var fileInput = $('#devanagari-image-selector')[0].files[0];
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var base64Image = e.target.result.split(',')[1];
+                    $.ajax({
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({image: base64Image}),
+                        url: '/predict_devanagari',
+                        success: function(response) {
+                            $('#devanagari-prediction-result').text('Predicted Character: ' + response.prediction.result + ', Accuracy: ' + response.prediction.accuracy.toFixed(2));
+                        }
+                    });
+                };
+                reader.readAsDataURL(fileInput);
             });
         });
     </script>
-    
-
-
-
-
-
 </body>
-
-
-
 </html>
