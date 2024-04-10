@@ -12,15 +12,39 @@
     <input id='mnist-image-selector' type="file" />
     <button id='mnist-predict-button'>Predict MNIST Digit</button>
     <p id="mnist-prediction-result"></p>
+    <img id="mnist-image-preview" src="#" alt="Preview" style="display: none; max-width: 300px;">
 
     <h2>Devanagari Character Recognition</h2>
     <input id='devanagari-image-selector' type="file" />
     <button id='devanagari-predict-button'>Predict Devanagari Character</button>
     <p id="devanagari-prediction-result"></p>
+    <img id="devanagari-image-preview" src="#" alt="Preview" style="display: none; max-width: 300px;">
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
+            $('#mnist-image-selector').change(function() {
+                var file = this.files[0];
+                if (file) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('#mnist-image-preview').attr('src', e.target.result).show();
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            $('#devanagari-image-selector').change(function() {
+                var file = this.files[0];
+                if (file) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('#devanagari-image-preview').attr('src', e.target.result).show();
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            
             $('#mnist-predict-button').click(function() {
                 var fileInput = $('#mnist-image-selector')[0].files[0];
                 var reader = new FileReader();
